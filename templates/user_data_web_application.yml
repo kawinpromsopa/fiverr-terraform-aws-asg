@@ -1,0 +1,36 @@
+#cloud-config #swapfile setup
+hostname: ${name}
+manage_etc_hosts: localhost
+swap:
+  filename: /swapfile
+  size: "auto"
+  maxsize: 4000000000
+runcmd:
+  - [ bash, -c, "apt-get install -y apache2" ]
+  - [ bash, -c, "apt-get install -y software-properties-common python-software-properties" ]
+  - [ bash, -c, "add-apt-repository -y ppa:ondrej/php" ]
+  - [ bash, -c, "apt-get update" ]
+  - [ bash, -c, "apt-get install -y php7.2 php7.2-cli php7.2-common php7.2-curl php7.2-gd php7.2-json php7.2-mbstring php7.2-intl php7.2-mysql php7.2-xml php7.2-zip --allow-unauthenticated" ]
+  - [ bash, -c, "curl -sL https://${github_personal_access_token}@raw.githubusercontent.com/kawinpromsopa/fiverr-terraform-web-app/master/templates/src/jquery.min.js > /var/www/html/timestampapi/jquery.min.js"]
+  - [ bash, -c, "curl -sL https://${github_personal_access_token}@raw.githubusercontent.com/kawinpromsopa/fiverr-terraform-web-app/master/templates/src/index.php > /var/www/html/timestampapi/index.php"]
+  - [ bash, -c, "curl -sL https://${github_personal_access_token}@raw.githubusercontent.com/kawinpromsopa/fiverr-terraform-web-app/master/templates/src/saveTimeStamp.php > /var/www/html/timestampapi/saveTimeStamp.php"]
+  - [ bash, -c, "curl -sL https://${github_personal_access_token}@raw.githubusercontent.com/kawinpromsopa/fiverr-terraform-web-app/master/templates/src/submit.php > /var/www/html/timestampapi/submit.php"]
+  - [ systemctl, restart, apache2]
+write_files:
+  - path: /var/www/html/timestampapi/database.php
+    content: |
+      <?php
+      
+      $servername = '${database_endpoint}';
+      $username = '${database_username}';
+      $password = '${database_password}';
+      
+      $c = mysqli_connect($servername, $username, $password);
+      date_default_timezone_set("Asia/Kolkata");
+      
+      
+      if(!$c){
+      	echo "Connection Error ! Please chk the username and password.";
+      }
+      
+      mysqli_select_db($c , 'timestampapi');
